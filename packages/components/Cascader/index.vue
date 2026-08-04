@@ -13,7 +13,7 @@ const props = defineProps({
   modelValue: { type: [Object, Array, String, Number], default: () => '' },
   options: [Function, Array],
   types: { type: Object, default: () => GlobalConfig.cascader.types },
-  type: { type: String, default: '' },
+  type: { type: [String, Number], default: '' },
   multiple: Boolean,
   filterable: { type: Boolean, default: () => GlobalConfig.cascader.filterable },
   clearable: { type: Boolean, default: () => GlobalConfig.cascader.clearable },
@@ -28,7 +28,9 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const attrs = useAttrs()
 
 const { types, type, level } = props
+const hasType = computed(() => type !== '' && type != null)
 const typeConfig = computed(() => {
+  if (!hasType.value) return {}
   const conf = types[type]
   if (!conf) return {}
   if (XEUtils.isFunction(conf) || XEUtils.isArray(conf)) {
@@ -78,15 +80,15 @@ function clearArrayLevels(arr, lv) {
 }
 
 const storeKey = computed(() => {
-  if (!type) return ''
-  return level ? `${type}${level}` : type
+  if (!hasType.value) return ''
+  return level ? `${type}${level}` : String(type)
 })
 
 const opts = ref([])
 
 const resolveOptions = async (options) => {
   let source = options
-  if (type && types[type] && source == null) {
+  if (hasType.value && types[type] && source == null) {
     const conf = types[type]
     source = (XEUtils.isFunction(conf) || XEUtils.isArray(conf)) ? conf : conf.options
   }

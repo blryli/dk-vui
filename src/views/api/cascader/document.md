@@ -7,7 +7,7 @@
 | modelValue | 绑定值 | string/number/array/object | - |
 | options | 选项集合，支持数组或返回数组的异步方法 | array/function | - |
 | types | 配置项 | object | {} |
-| type | 选项类型，结合配置项使用 | string | - |
+| type | 选项类型，结合配置项使用，支持数字（如 0） | string/number | - |
 | filterable | 是否可筛选 | boolean | true |
 | clearable | 是否可清除 | boolean | true |
 | multiple | 是否多选 | boolean | false |
