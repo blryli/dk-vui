@@ -28,10 +28,22 @@ const emit = defineEmits(['update:modelValue', 'change'])
 const attrs = useAttrs()
 
 const { types, type, level } = props
-const hasType = computed(() => type !== '' && type != null)
+
+// type 未传时，默认取 types 中的第一个配置
+const resolvedType = computed(() => {
+  if (type !== '' && type != null) return type
+  const keys = Object.keys(types || {})
+  if (!keys.length) return ''
+  const first = keys[0]
+  // Object.keys 得到的是字符串，数字 key 转回 number，兼容 :type="0"
+  return /^\d+$/.test(first) ? Number(first) : first
+})
+
+const hasType = computed(() => resolvedType.value !== '' && resolvedType.value != null)
+
 const typeConfig = computed(() => {
   if (!hasType.value) return {}
-  const conf = types[type]
+  const conf = types[resolvedType.value]
   if (!conf) return {}
   if (XEUtils.isFunction(conf) || XEUtils.isArray(conf)) {
     return { options: conf }
@@ -81,15 +93,15 @@ function clearArrayLevels(arr, lv) {
 
 const storeKey = computed(() => {
   if (!hasType.value) return ''
-  return level ? `${type}${level}` : String(type)
+  return level ? `${resolvedType.value}${level}` : String(resolvedType.value)
 })
 
 const opts = ref([])
 
 const resolveOptions = async (options) => {
   let source = options
-  if (hasType.value && types[type] && source == null) {
-    const conf = types[type]
+  if (hasType.value && types[resolvedType.value] && source == null) {
+    const conf = types[resolvedType.value]
     source = (XEUtils.isFunction(conf) || XEUtils.isArray(conf)) ? conf : conf.options
   }
   if (XEUtils.isArray(source)) {
@@ -129,7 +141,7 @@ watch(
 
     if (key) {
       store[key].options = opts.value
-      const typeOpts = types[type]
+      const typeOpts = types[resolvedType.value]
       const canUpdate = XEUtils.isFunction(options)
         || XEUtils.isFunction(typeOpts)
         || XEUtils.isFunction(typeOpts?.options)
