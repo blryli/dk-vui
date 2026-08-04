@@ -72,7 +72,33 @@ DKVui.setup({
 | joinPath | 将路径数组用指定分隔符拼接后写入 v-model（常与 emitPath 搭配） | string | - |
 | sortDisabled | 筛选时是否将包含「已禁用」的建议项沉底 | boolean | true |
 | lazy | 是否动态加载子节点 | boolean | false |
-| lazyLoad | 加载动态数据的方法，仅 lazy 为 true 时生效 | function | - |
+| lazyLoad | 加载动态数据的方法，仅 lazy 为 true 时生效。签名：`(node, resolve, props) => void`，第三个参数为当前 VCascader 的 props（含透传 attrs） | function | - |
+
+#### lazyLoad 中读取组件 props
+
+```js
+3: { // 区域
+  lazy: true,
+  lazyLoad(node, resolve, props) {
+    const { root, value } = node
+    area({ parent_id: root ? 0 : value }).then(res => {
+      const nodes = res.data.map(item => ({
+        value: item.area_id,
+        label: item.area_name,
+        // 通过第三个参数读取组件上的 areaLevel / level
+        leaf: item.level > ((props.areaLevel || props.level || 3) - 1)
+      }))
+      resolve(nodes)
+    })
+  }
+}
+```
+
+```html
+<VCascader v-model="form.area" type="3" :area-level="2" />
+<!-- 或使用组件已有的 level -->
+<VCascader v-model="form.area" type="3" :level="2" />
+```
 
 #### 结合 type 使用
 

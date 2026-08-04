@@ -25,6 +25,7 @@ const props = defineProps({
   sortDisabled: { type: Boolean, default: true }, // 筛选时是否将包含「已禁用」的建议项沉底
 })
 const emit = defineEmits(['update:modelValue', 'change'])
+const attrs = useAttrs()
 
 const { types, type, level } = props
 const typeConfig = computed(() => {
@@ -154,7 +155,13 @@ const cascaderProps = computed(() => {
     children = 'sub',
     emitPath: typeEmitPath,
   } = typeConfig.value
-  if (lazy) return { lazy, lazyLoad }
+  if (lazy) {
+    return {
+      lazy,
+      // 第三个参数注入组件 props / attrs，便于 types 中读取如 areaLevel、level 等
+      lazyLoad: (node, resolve) => lazyLoad?.(node, resolve, { ...attrs, ...props }),
+    }
+  }
   return {
     emitPath: typeEmitPath ?? props.emitPath,
     checkStrictly: props.checkStrictly,
