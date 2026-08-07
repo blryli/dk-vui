@@ -234,7 +234,7 @@ const change = (value) => {
     : props.multiple
       ? getCheckedNodes.map(d => d['label'])
       : getCheckedNodes[0]['label']
-  emit('change', { value, labels })
+  emit('change', { value, labels, nodes: getCheckedNodes })
 }
 
 defineExpose({ contentRef })
