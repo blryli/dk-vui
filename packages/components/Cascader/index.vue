@@ -29,9 +29,11 @@ const attrs = useAttrs()
 
 const { types, type, level } = props
 
-// type 未传时，默认取 types 中的第一个配置
+// type 未传且未传 options 时，默认取 types 中的第一个配置
 const resolvedType = computed(() => {
   if (type !== '' && type != null) return type
+  // 显式传了 options 时，不套用 types，避免覆盖 emitPath 等 props
+  if (props.options != null) return ''
   const keys = Object.keys(types || {})
   if (!keys.length) return ''
   const first = keys[0]
@@ -227,13 +229,13 @@ const filterMethod = (node, val) => {
 
 const contentRef = ref()
 const change = (value) => {
-  const getCheckedNodes = contentRef?.value.getCheckedNodes()
+  const getCheckedNodes = contentRef?.value?.getCheckedNodes?.() || []
   const useEmitPath = typeConfig.value.emitPath ?? props.emitPath
   const labels = useEmitPath
     ? (getCheckedNodes[0]?.pathLabels || [])
     : props.multiple
-      ? getCheckedNodes.map(d => d['label'])
-      : getCheckedNodes[0]['label']
+      ? getCheckedNodes.map(d => d?.label)
+      : (getCheckedNodes[0]?.label ?? '')
   emit('change', { value, labels, nodes: getCheckedNodes })
 }
 
